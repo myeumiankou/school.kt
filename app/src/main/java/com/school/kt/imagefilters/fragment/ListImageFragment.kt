@@ -1,15 +1,19 @@
 package com.school.kt.imagefilters.fragment
 
 import android.os.Bundle
+import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.*
 import android.widget.SearchView
 import android.widget.TextView
+import android.widget.Toast
 import com.arellomobile.mvp.MvpAppCompatFragment
 import com.arellomobile.mvp.presenter.InjectPresenter
 import com.school.kt.imagefilters.R
 import com.school.kt.imagefilters.data.Image
 import com.school.kt.imagefilters.presenter.ListImagePresenter
+import com.school.kt.imagefilters.ui.GridItemDecoration
+import com.school.kt.imagefilters.ui.ImageAdapter
 import com.school.kt.imagefilters.view.ListImageView
 
 
@@ -20,12 +24,16 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
 
     private var messageView: TextView? = null
     private var recyclerView: RecyclerView? = null
+    private var adapter = ImageAdapter()
     private var searchView: SearchView? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.list_image_fragment_layout, container, true)
         messageView = view.findViewById(R.id.messageView)
         recyclerView = view.findViewById(R.id.recyclerView)
+        recyclerView?.adapter = adapter
+        recyclerView?.layoutManager = GridLayoutManager(context, 4)
+        recyclerView?.addItemDecoration(GridItemDecoration(10, 4))
         setHasOptionsMenu(true)
         return view
     }
@@ -47,14 +55,27 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
     }
 
     override fun showListImages(images: List<Image>) {
-        messageView?.setText(images.toString())
+        adapter.images = images
+        adapter.notifyDataSetChanged()
     }
 
+
+
     override fun showProgress(show: Boolean) {
-        messageView?.setText("Loading...")
+        messageView?.text = if (show) {
+            adapter.images = emptyList()
+            adapter.notifyDataSetChanged()
+            "Loading..."
+        } else ""
     }
 
     override fun showNoResultView() {
-        messageView?.setText("No results. Try another search!")
+        adapter.images = emptyList()
+        adapter.notifyDataSetChanged()
+        messageView?.text = "No results. Try another search!"
+    }
+
+    override fun showResultCount(count: Int) {
+        Toast.makeText(context, "Results: $count", Toast.LENGTH_SHORT).show()
     }
 }

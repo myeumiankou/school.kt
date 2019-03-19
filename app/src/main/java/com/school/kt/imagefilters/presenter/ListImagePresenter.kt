@@ -22,7 +22,6 @@ class ListImagePresenter : MvpPresenter<ListImageView>() {
 
             uiHandler.post {
                 displayResults(results)
-                //viewState.showProgress(false)
             }
         }.start()
     }
@@ -39,16 +38,18 @@ class ListImagePresenter : MvpPresenter<ListImageView>() {
 
             uiHandler.post {
                 displayResults(result)
-                //viewState.showProgress(false)
             }
         }.start()
     }
 
     private fun displayResults(result: List<Image>?) {
         if (result == null || result.isEmpty()) {
+            viewState.showResultCount(0)
             viewState.showNoResultView()
         } else {
+            viewState.showResultCount(result.size)
             viewState.showListImages(result)
+            viewState.showProgress(false)
         }
     }
 }
