@@ -3,7 +3,6 @@ package com.school.kt.imagefilters.presenter
 import android.os.Handler
 import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
-import com.school.kt.imagefilters.data.Image
 import com.school.kt.imagefilters.repository.ListImageRepository
 import com.school.kt.imagefilters.view.ListImageView
 
@@ -42,14 +41,19 @@ class ListImagePresenter : MvpPresenter<ListImageView>() {
         }.start()
     }
 
-    private fun displayResults(result: List<Image>?) {
-        if (result == null || result.isEmpty()) {
-            viewState.showResultCount(0)
-            viewState.showNoResultView()
-        } else {
-            viewState.showResultCount(result.size)
-            viewState.showListImages(result)
-            viewState.showProgress(false)
+    private fun displayResults(result: ListImageRepository.Result) {
+        when (result) {
+            is ListImageRepository.Result.Fail -> viewState.showFail(result.errorCode)
+            is ListImageRepository.Result.Error -> viewState.showError(result.description)
+            is ListImageRepository.Result.Success -> {
+                if (result.list.isNullOrEmpty()) {
+                    viewState.showNoResultView()
+                } else {
+                    viewState.showResultCount(result.list.size)
+                    viewState.showListImages(result.list)
+                    viewState.showProgress(false)
+                }
+            }
         }
     }
 }

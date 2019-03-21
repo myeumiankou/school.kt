@@ -12,4 +12,8 @@ interface ListImageView : MvpView {
     fun showProgress(show: Boolean)
 
     fun showNoResultView()
+
+    fun showFail(error : Int)
+
+    fun showError(error : String?)
 }

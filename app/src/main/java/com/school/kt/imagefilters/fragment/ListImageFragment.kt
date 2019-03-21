@@ -22,6 +22,10 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
     @InjectPresenter
     lateinit var presenter: ListImagePresenter
 
+    companion object {
+        const val IMAGE_ROW_COUNT = 4
+    }
+
     private var messageView: TextView? = null
     private var recyclerView: RecyclerView? = null
     private var adapter = ImageAdapter()
@@ -32,8 +36,8 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
         messageView = view.findViewById(R.id.messageView)
         recyclerView = view.findViewById(R.id.recyclerView)
         recyclerView?.adapter = adapter
-        recyclerView?.layoutManager = GridLayoutManager(context, 4)
-        recyclerView?.addItemDecoration(GridItemDecoration(10, 4))
+        recyclerView?.layoutManager = GridLayoutManager(context, IMAGE_ROW_COUNT)
+        recyclerView?.addItemDecoration(GridItemDecoration(10, IMAGE_ROW_COUNT))
         setHasOptionsMenu(true)
         return view
     }
@@ -59,8 +63,6 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
         adapter.notifyDataSetChanged()
     }
 
-
-
     override fun showProgress(show: Boolean) {
         messageView?.text = if (show) {
             adapter.images = emptyList()
@@ -77,5 +79,13 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
 
     override fun showResultCount(count: Int) {
         Toast.makeText(context, "Results: $count", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun showFail(error: Int) {
+        messageView?.text = "Fail. Code = $error"
+    }
+
+    override fun showError(error: String?) {
+        messageView?.text = "Error. Message: $error"
     }
 }

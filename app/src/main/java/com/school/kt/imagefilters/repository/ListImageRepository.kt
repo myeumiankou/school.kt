@@ -7,35 +7,47 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class ListImageRepository {
 
-    fun searchImages(query: String): List<Image>? {
+    sealed class Result {
+        data class Success(val list: List<Image>?) : Result()
+        data class Fail(val errorCode: Int) : Result()
+        data class Error(val description: String?) : Result()
+    }
+
+    fun searchImages(query: String): Result {
         val retrofit = Retrofit.Builder()
             .baseUrl("http://www.splashbase.co/api/v1/images/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
         val service = retrofit.create<ImageService>(ImageService::class.java)
-        val result = service.searchImages(query).execute().body()
-
-        return if (result != null) {
-            result.images
-        } else {
-            emptyList()
+        return try {
+            val executor = service.searchImages(query).execute()
+            if (executor.isSuccessful) {
+                Result.Success(executor.body()?.images)
+            } else {
+                Result.Fail(executor.code())
+            }
+        } catch (e: Exception) {
+            Result.Error(e.message)
         }
     }
 
-    fun latestImages(): List<Image>? {
+    fun latestImages(): Result {
         val retrofit = Retrofit.Builder()
             .baseUrl("http://www.splashbase.co/api/v1/images/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
         val service = retrofit.create<ImageService>(ImageService::class.java)
-        val result = service.latestImages().execute().body()
-
-        return if (result != null) {
-            result.images
-        } else {
-            emptyList()
+        return try {
+            val executor = service.latestImages().execute()
+            if (executor.isSuccessful) {
+                Result.Success(executor.body()?.images)
+            } else {
+                Result.Fail(executor.code())
+            }
+        } catch (e: Exception) {
+            Result.Error(e.message)
         }
     }
 }
