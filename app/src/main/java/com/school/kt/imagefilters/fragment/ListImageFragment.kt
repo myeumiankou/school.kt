@@ -1,6 +1,7 @@
 package com.school.kt.imagefilters.fragment
 
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.view.*
@@ -9,18 +10,29 @@ import android.widget.TextView
 import android.widget.Toast
 import com.arellomobile.mvp.MvpAppCompatFragment
 import com.arellomobile.mvp.presenter.InjectPresenter
+import com.arellomobile.mvp.presenter.ProvidePresenter
 import com.school.kt.imagefilters.R
 import com.school.kt.imagefilters.data.Image
 import com.school.kt.imagefilters.presenter.ListImagePresenter
+import com.school.kt.imagefilters.repository.ListImageRepository
 import com.school.kt.imagefilters.ui.GridItemDecoration
 import com.school.kt.imagefilters.ui.ImageAdapter
 import com.school.kt.imagefilters.view.ListImageView
+import org.koin.android.ext.android.inject
 
 
 class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQueryTextListener {
 
+    private val repository : ListImageRepository by inject()
+    private val uiHandler : Handler by inject()
+
     @InjectPresenter
     lateinit var presenter: ListImagePresenter
+
+    @ProvidePresenter
+    fun providePresenter() : ListImagePresenter {
+        return ListImagePresenter(repository, uiHandler)
+    }
 
     companion object {
         const val IMAGE_ROW_COUNT = 4

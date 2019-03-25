@@ -4,14 +4,14 @@ import android.os.Handler
 import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
 import com.school.kt.imagefilters.repository.ListImageRepository
+import com.school.kt.imagefilters.repository.Result
 import com.school.kt.imagefilters.view.ListImageView
 
 @InjectViewState
-class ListImagePresenter : MvpPresenter<ListImageView>() {
-
-    // todo inject me using Koin
-    private val repository = ListImageRepository()
-    private val uiHandler = Handler()
+class ListImagePresenter(
+    val repository: ListImageRepository,
+    val uiHandler: Handler
+) : MvpPresenter<ListImageView>() {
 
     override fun onFirstViewAttach() {
         viewState.showProgress(true)
@@ -41,11 +41,11 @@ class ListImagePresenter : MvpPresenter<ListImageView>() {
         }.start()
     }
 
-    private fun displayResults(result: ListImageRepository.Result) {
+    private fun displayResults(result: Result) {
         when (result) {
-            is ListImageRepository.Result.Fail -> viewState.showFail(result.errorCode)
-            is ListImageRepository.Result.Error -> viewState.showError(result.description)
-            is ListImageRepository.Result.Success -> {
+            is Result.Fail -> viewState.showFail(result.errorCode)
+            is Result.Error -> viewState.showError(result.description)
+            is Result.Success -> {
                 if (result.list.isNullOrEmpty()) {
                     viewState.showNoResultView()
                 } else {
