@@ -75,12 +75,14 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
         adapter.notifyDataSetChanged()
     }
 
-    override fun showProgress(show: Boolean) {
-        messageView?.text = if (show) {
-            adapter.images = emptyList()
-            adapter.notifyDataSetChanged()
-            "Loading..."
-        } else ""
+    override fun showProgress() {
+        adapter.images = emptyList()
+        adapter.notifyDataSetChanged()
+        messageView?.text = "Loading..."
+    }
+
+    override fun hideProgress() {
+        messageView?.text = ""
     }
 
     override fun showNoResultView() {

@@ -9,12 +9,12 @@ import com.school.kt.imagefilters.view.ListImageView
 
 @InjectViewState
 class ListImagePresenter(
-    val repository: ListImageRepository,
-    val uiHandler: Handler
+    private val repository: ListImageRepository,
+    private val uiHandler: Handler
 ) : MvpPresenter<ListImageView>() {
 
     override fun onFirstViewAttach() {
-        viewState.showProgress(true)
+        viewState.showProgress()
         // todo run it asynchronously using Kotlin Coroutines
         Thread {
             val results = repository.latestImages()
@@ -26,7 +26,7 @@ class ListImagePresenter(
     }
 
     fun searchImages(query: String?) {
-        viewState.showProgress(true)
+        viewState.showProgress()
         // todo run it asynchronously using Kotlin Coroutines
         Thread {
             val result = if (query != null) {
@@ -41,17 +41,17 @@ class ListImagePresenter(
         }.start()
     }
 
-    private fun displayResults(result: Result) {
+    private fun displayResults(result: Result) = with(viewState) {
         when (result) {
-            is Result.Fail -> viewState.showFail(result.errorCode)
-            is Result.Error -> viewState.showError(result.description)
+            is Result.Fail -> showFail(result.errorCode)
+            is Result.Error -> showError(result.description)
             is Result.Success -> {
                 if (result.list.isNullOrEmpty()) {
-                    viewState.showNoResultView()
+                    showNoResultView()
                 } else {
-                    viewState.showResultCount(result.list.size)
-                    viewState.showListImages(result.list)
-                    viewState.showProgress(false)
+                    showResultCount(result.list.size)
+                    showListImages(result.list)
+                    hideProgress()
                 }
             }
         }

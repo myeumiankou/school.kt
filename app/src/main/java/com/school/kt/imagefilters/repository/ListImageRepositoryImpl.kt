@@ -1,24 +1,16 @@
 package com.school.kt.imagefilters.repository
 
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
-
-class ListImageRepositoryImpl : ListImageRepository {
+class ListImageRepositoryImpl(private val imageService: ImageService) : ListImageRepository {
 
     override fun searchImages(query: String): Result {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://www.splashbase.co/api/v1/images/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val service = retrofit.create<ImageService>(ImageService::class.java)
         return try {
-            val executor = service.searchImages(query).execute()
-            if (executor.isSuccessful) {
-                Result.Success(executor.body()?.images)
-            } else {
-                Result.Fail(executor.code())
+            with(imageService.searchImages(query).execute()) {
+                if (isSuccessful) {
+                    Result.Success(body()?.images)
+                } else {
+                    Result.Fail(code())
+                }
             }
         } catch (e: Exception) {
             Result.Error(e.message)
@@ -26,18 +18,13 @@ class ListImageRepositoryImpl : ListImageRepository {
     }
 
     override fun latestImages(): Result {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("http://www.splashbase.co/api/v1/images/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val service = retrofit.create<ImageService>(ImageService::class.java)
         return try {
-            val executor = service.latestImages().execute()
-            if (executor.isSuccessful) {
-                Result.Success(executor.body()?.images)
-            } else {
-                Result.Fail(executor.code())
+            with(imageService.latestImages().execute()) {
+                if (isSuccessful) {
+                    Result.Success(body()?.images)
+                } else {
+                    Result.Fail(code())
+                }
             }
         } catch (e: Exception) {
             Result.Error(e.message)

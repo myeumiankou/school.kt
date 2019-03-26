@@ -9,7 +9,9 @@ interface ListImageView : MvpView {
 
     fun showListImages(images: List<Image>)
 
-    fun showProgress(show: Boolean)
+    fun showProgress()
+
+    fun hideProgress()
 
     fun showNoResultView()
 
