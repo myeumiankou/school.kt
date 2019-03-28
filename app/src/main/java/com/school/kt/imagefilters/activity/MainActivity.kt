@@ -1,7 +1,8 @@
-package com.school.kt.imagefilters
+package com.school.kt.imagefilters.activity
 
 import android.os.Bundle
 import com.arellomobile.mvp.MvpAppCompatActivity
+import com.school.kt.imagefilters.R
 
 class MainActivity : MvpAppCompatActivity() {
 
