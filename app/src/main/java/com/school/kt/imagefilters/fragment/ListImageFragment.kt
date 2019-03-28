@@ -19,7 +19,7 @@ import com.school.kt.imagefilters.view.ListImageView
 import kotlinx.android.synthetic.main.list_image_fragment_layout.*
 import org.koin.android.ext.android.inject
 
-class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQueryTextListener {
+class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQueryTextListener, ImageAdapter.ImageClickListener {
 
     private val repository: ListImageRepository by inject()
     private val uiHandler: Handler by inject()
@@ -43,7 +43,7 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         with(recyclerView) {
-            adapter = ImageAdapter()
+            adapter = ImageAdapter(this@ListImageFragment)
             layoutManager = GridLayoutManager(context, IMAGE_ROW_COUNT)
             addItemDecoration(GridItemDecoration(10, IMAGE_ROW_COUNT))
         }
@@ -56,6 +56,10 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
             searchView = menu?.findItem(R.id.search)!!.actionView as SearchView
         }
         searchView.setOnQueryTextListener(this)
+    }
+
+    override fun onImageClicked(image: Image) {
+        Toast.makeText(context, "Selected image: $image", Toast.LENGTH_SHORT).show()
     }
 
     override fun onQueryTextChange(query: String) = true
