@@ -9,10 +9,10 @@ import com.school.kt.imagefilters.data.Image
 class ImageViewHolder(view: ImageView) : RecyclerView.ViewHolder(view) {
 
     fun bind(image: Image, clickListener: ImageAdapter.ImageClickListener) {
-        with(itemView as ImageView) {
-            Glide.with(this).load(image.url).centerCrop().into(this)
-            ViewCompat.setTransitionName(this, image.url)
-            setOnClickListener { clickListener.onImageClicked(itemView, image) }
+        (itemView as ImageView).apply {
+            Glide.with(itemView).load(image.url).centerCrop().into(itemView)
+            ViewCompat.setTransitionName(itemView, image.url)
+            itemView.setOnClickListener { clickListener.onImageClicked(itemView, image) }
         }
     }
 }

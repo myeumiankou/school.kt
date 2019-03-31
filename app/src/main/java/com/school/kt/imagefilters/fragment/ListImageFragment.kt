@@ -13,16 +13,20 @@ import com.school.kt.imagefilters.R
 import com.school.kt.imagefilters.data.Image
 import com.school.kt.imagefilters.presenter.ListImagePresenter
 import com.school.kt.imagefilters.repository.ListImageRepository
+import com.school.kt.imagefilters.router.ImagePreviewRouter
 import com.school.kt.imagefilters.ui.GridItemDecoration
 import com.school.kt.imagefilters.ui.ImageAdapter
 import com.school.kt.imagefilters.view.ListImageView
 import kotlinx.android.synthetic.main.list_image_fragment_layout.*
 import org.koin.android.ext.android.inject
+import org.koin.core.parameter.parametersOf
 
-class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQueryTextListener, ImageAdapter.ImageClickListener {
+class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQueryTextListener,
+    ImageAdapter.ImageClickListener {
 
     private val repository: ListImageRepository by inject()
     private val uiHandler: Handler by inject()
+    private val router: ImagePreviewRouter by inject { parametersOf(fragmentManager) }
 
     @InjectPresenter
     lateinit var presenter: ListImagePresenter
@@ -39,7 +43,7 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
     private lateinit var searchView: SearchView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.list_image_fragment_layout, container, true)
+        inflater.inflate(R.layout.list_image_fragment_layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         with(recyclerView) {
@@ -58,8 +62,8 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
         searchView.setOnQueryTextListener(this)
     }
 
-    override fun onImageClicked(image: Image) {
-        Toast.makeText(context, "Selected image: $image", Toast.LENGTH_SHORT).show()
+    override fun onImageClicked(view : View, image: Image) {
+        router.showImagePreview(this, view, image)
     }
 
     override fun onQueryTextChange(query: String) = true

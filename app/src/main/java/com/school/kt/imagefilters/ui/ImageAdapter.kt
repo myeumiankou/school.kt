@@ -1,17 +1,18 @@
 package com.school.kt.imagefilters.ui
 
 import android.support.v7.widget.RecyclerView
+import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import com.school.kt.imagefilters.data.Image
 
-class ImageAdapter(val clickListener: ImageClickListener) : RecyclerView.Adapter<ImageViewHolder>() {
+class ImageAdapter(private val clickListener: ImageClickListener) : RecyclerView.Adapter<ImageViewHolder>() {
 
     var images: List<Image> = emptyList()
 
     interface ImageClickListener {
-        fun onImageClicked(image: Image)
+        fun onImageClicked(view: View, image: Image)
     }
 
     override fun onBindViewHolder(holder: ImageViewHolder, position: Int) = holder.bind(images[position], clickListener)
