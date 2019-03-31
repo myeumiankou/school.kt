@@ -49,7 +49,7 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
         with(recyclerView) {
             adapter = ImageAdapter(this@ListImageFragment)
             layoutManager = GridLayoutManager(context, IMAGE_ROW_COUNT)
-            addItemDecoration(GridItemDecoration(10, IMAGE_ROW_COUNT))
+            addItemDecoration(GridItemDecoration(5, IMAGE_ROW_COUNT))
         }
         setHasOptionsMenu(true)
     }

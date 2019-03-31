@@ -4,6 +4,8 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.support.v7.widget.DividerItemDecoration
+import android.support.v7.widget.LinearLayoutManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,9 +18,14 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.school.kt.imagefilters.R
 import com.school.kt.imagefilters.data.Image
+import com.school.kt.imagefilters.di.GlideOptions
+import com.school.kt.imagefilters.ui.FilterImageAdapter
+import com.school.kt.imagefilters.ui.GridItemDecoration
+import jp.wasabeef.glide.transformations.BitmapTransformation
 import kotlinx.android.synthetic.main.edit_image_fragment_layout.*
 
-class EditImageFragment : MvpAppCompatFragment() {
+// todo add MVP
+class EditImageFragment : MvpAppCompatFragment(), FilterImageAdapter.ImageClickListener {
 
     companion object {
         private const val IMAGE_URL_EXTRA = "image_url"
@@ -30,7 +37,6 @@ class EditImageFragment : MvpAppCompatFragment() {
                 val fragment = EditImageFragment()
                 fragment.arguments = this
                 return fragment
-
             }
         }
     }
@@ -39,15 +45,23 @@ class EditImageFragment : MvpAppCompatFragment() {
         inflater.inflate(R.layout.edit_image_fragment_layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        // todo add MVP
-        val image = arguments?.getParcelable<Image>(IMAGE_URL_EXTRA)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            imageView.transitionName = image?.url
+        arguments?.getParcelable<Image>(IMAGE_URL_EXTRA)?.apply {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                imageView.transitionName = this.url
+            }
+            loadImage(this)
+
+            with(recyclerView) {
+                adapter = FilterImageAdapter(this@apply, this@EditImageFragment)
+                layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+                addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.HORIZONTAL))
+            }
         }
-        loadImage(image)
     }
 
-    private fun loadImage(image: Image?) {
+    override fun onImageClicked(image: Image, transformation: BitmapTransformation) = loadImage(image, transformation)
+
+    private fun loadImage(image: Image, transformation: BitmapTransformation? = null) {
         val highQualityCallback = object : RequestListener<Drawable> {
 
             override fun onLoadFailed(
@@ -66,7 +80,7 @@ class EditImageFragment : MvpAppCompatFragment() {
                 dataSource: DataSource?,
                 isFirstResource: Boolean
             ): Boolean {
-                Toast.makeText(context, "High quality image loaded", Toast.LENGTH_SHORT).show()
+                textView.text = "High quality image loaded"
                 return false
             }
         }
@@ -90,16 +104,34 @@ class EditImageFragment : MvpAppCompatFragment() {
                 dataSource: DataSource?,
                 isFirstResource: Boolean
             ): Boolean {
-                Handler().post {
-                    Glide.with(this@EditImageFragment)
-                        .load(image?.largeUrl)
-                        .placeholder(resource)
-                        .listener(highQualityCallback)
-                        .into(imageView)
-                }
+                // TODO find better solution???
+                textView.text = "Low quality image loaded (Loading high quality...)"
+                Handler().postDelayed({
+                    if (transformation != null) {
+                        Glide.with(this@EditImageFragment)
+                            .load(image.largeUrl)
+                            .placeholder(resource)
+                            .apply(GlideOptions.bitmapTransform(transformation))
+                            .listener(highQualityCallback)
+                            .into(imageView)
+                    } else {
+                        Glide.with(this@EditImageFragment)
+                            .load(image.largeUrl)
+                            .placeholder(resource)
+                            .listener(highQualityCallback)
+                            .into(imageView)
+                    }
+                }, 100)
                 return false
             }
         }
-        Glide.with(this).load(image?.url).listener(lowQualityCallback).into(imageView)
+
+        // TODO find better solution???
+        if (transformation != null) {
+            Glide.with(this).load(image.url).placeholder(imageView.drawable)
+                .apply(GlideOptions.bitmapTransform(transformation)).listener(lowQualityCallback).into(imageView)
+        } else {
+            Glide.with(this).load(image.url).listener(lowQualityCallback).into(imageView)
+        }
     }
 }
