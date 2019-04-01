@@ -11,6 +11,7 @@ import com.arellomobile.mvp.presenter.InjectPresenter
 import com.arellomobile.mvp.presenter.ProvidePresenter
 import com.school.kt.imagefilters.R
 import com.school.kt.imagefilters.data.Image
+import com.school.kt.imagefilters.dsl.NotificationManager
 import com.school.kt.imagefilters.presenter.ListImagePresenter
 import com.school.kt.imagefilters.repository.ListImageRepository
 import com.school.kt.imagefilters.router.ImagePreviewRouter
@@ -24,6 +25,7 @@ import org.koin.core.parameter.parametersOf
 class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQueryTextListener,
     ImageAdapter.ImageClickListener {
 
+    private val notificationManager: NotificationManager by inject()
     private val repository: ListImageRepository by inject()
     private val uiHandler: Handler by inject()
     private val router: ImagePreviewRouter by inject { parametersOf(fragmentManager) }
@@ -60,6 +62,13 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
             searchView = menu?.findItem(R.id.search)!!.actionView as SearchView
         }
         searchView.setOnQueryTextListener(this)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when(item?.itemId) {
+            R.id.notification -> notificationManager.showTestNotification()
+        }
+        return false
     }
 
     override fun onImageClicked(view : View, image: Image) {

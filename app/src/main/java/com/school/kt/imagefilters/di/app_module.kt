@@ -3,6 +3,7 @@ package com.school.kt.imagefilters.di
 import android.os.Handler
 import android.support.v4.app.FragmentManager
 import com.school.kt.imagefilters.di.ServiceProperties.BASE_URL
+import com.school.kt.imagefilters.dsl.NotificationManager
 import com.school.kt.imagefilters.repository.ImageService
 import com.school.kt.imagefilters.repository.ListImageRepository
 import com.school.kt.imagefilters.repository.ListImageRepositoryImpl
@@ -18,6 +19,10 @@ val appModule = module {
     single { Handler() }
 
     factory { (fm: FragmentManager) -> ImagePreviewRouter(fm) }
+}
+
+val notificationModule = module {
+    single { NotificationManager(androidContext()) }
 }
 
 object ServiceProperties {

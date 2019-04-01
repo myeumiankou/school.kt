@@ -3,4 +3,6 @@
 
     <string name="search_label">Search</string>
     <string name="search_message">Search images first</string>
+
+    <string name="show_notification">Show notification</string>
 </resources>

@@ -6,4 +6,9 @@
             android:title="@string/search_label"
             app:showAsAction="always"
             app:actionViewClass="android.widget.SearchView" />
+
+    <item
+        android:id="@+id/notification"
+        android:title="@string/show_notification"
+        app:showAsAction="never"/>
 </menu>
