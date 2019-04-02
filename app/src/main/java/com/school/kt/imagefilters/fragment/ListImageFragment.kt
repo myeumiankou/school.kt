@@ -2,9 +2,12 @@ package com.school.kt.imagefilters.fragment
 
 import android.os.Bundle
 import android.os.Handler
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.GridLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.*
 import android.widget.SearchView
+import android.widget.TextView
 import android.widget.Toast
 import com.arellomobile.mvp.MvpAppCompatFragment
 import com.arellomobile.mvp.presenter.InjectPresenter
@@ -18,7 +21,12 @@ import com.school.kt.imagefilters.router.ImagePreviewRouter
 import com.school.kt.imagefilters.ui.GridItemDecoration
 import com.school.kt.imagefilters.ui.ImageAdapter
 import com.school.kt.imagefilters.view.ListImageView
-import kotlinx.android.synthetic.main.list_image_fragment_layout.*
+import org.jetbrains.anko.frameLayout
+import org.jetbrains.anko.recyclerview.v7.recyclerView
+import org.jetbrains.anko.sp
+import org.jetbrains.anko.support.v4.UI
+import org.jetbrains.anko.textColor
+import org.jetbrains.anko.textView
 import org.koin.android.ext.android.inject
 import org.koin.core.parameter.parametersOf
 
@@ -29,6 +37,9 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
     private val repository: ListImageRepository by inject()
     private val uiHandler: Handler by inject()
     private val router: ImagePreviewRouter by inject { parametersOf(fragmentManager) }
+
+    private lateinit var recyclerView: RecyclerView
+    private lateinit var messageView: TextView
 
     @InjectPresenter
     lateinit var presenter: ListImagePresenter
@@ -45,14 +56,25 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
     private lateinit var searchView: SearchView
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
-        inflater.inflate(R.layout.list_image_fragment_layout, container, false)
+        UI {
+            frameLayout {
+                recyclerView = recyclerView {
+                    lparams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+                    adapter = ImageAdapter(this@ListImageFragment)
+                    layoutManager = GridLayoutManager(context, IMAGE_ROW_COUNT)
+                    addItemDecoration(GridItemDecoration(5, IMAGE_ROW_COUNT))
+                }
+
+                messageView = textView {
+                    gravity = Gravity.CENTER
+                    textSize = sp(10).toFloat()
+                    textColor = ContextCompat.getColor(context, R.color.colorPrimaryDark)
+                    text = getString(R.string.search_message)
+                }
+            }
+        }.view
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        with(recyclerView) {
-            adapter = ImageAdapter(this@ListImageFragment)
-            layoutManager = GridLayoutManager(context, IMAGE_ROW_COUNT)
-            addItemDecoration(GridItemDecoration(5, IMAGE_ROW_COUNT))
-        }
         setHasOptionsMenu(true)
     }
 
@@ -65,13 +87,13 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when(item?.itemId) {
+        when (item?.itemId) {
             R.id.notification -> notificationManager.showTestNotification()
         }
         return false
     }
 
-    override fun onImageClicked(view : View, image: Image) {
+    override fun onImageClicked(view: View, image: Image) {
         router.showImagePreview(this, view, image)
     }
 
