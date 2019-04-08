@@ -59,79 +59,60 @@ class EditImageFragment : MvpAppCompatFragment(), FilterImageAdapter.ImageClickL
         }
     }
 
-    override fun onImageClicked(image: Image, transformation: BitmapTransformation) = loadImage(image, transformation)
+    override fun onImageClicked(image: Image, transformation: BitmapTransformation) {
+        textView.text = "Image transformation has started"
+        loadImage(image, transformation)
+    }
 
     private fun loadImage(image: Image, transformation: BitmapTransformation? = null) {
-        val highQualityCallback = object : RequestListener<Drawable> {
-
-            override fun onLoadFailed(
-                e: GlideException?,
-                model: Any?,
-                target: Target<Drawable>?,
-                isFirstResource: Boolean
-            ): Boolean {
-                return false
-            }
-
-            override fun onResourceReady(
-                resource: Drawable?,
-                model: Any?,
-                target: Target<Drawable>?,
-                dataSource: DataSource?,
-                isFirstResource: Boolean
-            ): Boolean {
-                textView.text = "High quality image loaded"
-                return false
-            }
+        val highQualityCallback = runInGlideCallback {
+            textView.text = "High quality image loaded"
         }
 
-
-        val lowQualityCallback = object : RequestListener<Drawable> {
-
-            override fun onLoadFailed(
-                e: GlideException?,
-                model: Any?,
-                target: Target<Drawable>?,
-                isFirstResource: Boolean
-            ): Boolean {
-                return false
-            }
-
-            override fun onResourceReady(
-                resource: Drawable?,
-                model: Any?,
-                target: Target<Drawable>?,
-                dataSource: DataSource?,
-                isFirstResource: Boolean
-            ): Boolean {
-                // TODO find better solution???
-                textView.text = "Low quality image loaded (Loading high quality...)"
-                Handler().postDelayed({
-                    if (transformation != null) {
-                        Glide.with(this@EditImageFragment)
-                            .load(image.largeUrl)
-                            .placeholder(resource)
-                            .apply(GlideOptions.bitmapTransform(transformation))
-                            .listener(highQualityCallback)
-                            .into(imageView)
-                    } else {
-                        Glide.with(this@EditImageFragment)
-                            .load(image.largeUrl)
-                            .placeholder(resource)
-                            .listener(highQualityCallback)
-                            .into(imageView)
-                    }
-                }, 100)
-                return false
-            }
+        val lowQualityCallback = runInGlideCallback {
+            textView.text = "Low quality image loaded (Loading high quality...)"
+            Handler().postDelayed({
+                loadImageToView(image.url, it, transformation, highQualityCallback)
+            }, 100)
         }
 
-        // TODO find better solution???
-        if (transformation != null) {
-            Glide.with(this).load(image.url).placeholder(imageView.drawable)
-                .apply(GlideOptions.bitmapTransform(transformation)).listener(lowQualityCallback).into(imageView)
-        } else {
-            Glide.with(this).load(image.url).listener(lowQualityCallback).into(imageView)
-        }
+        loadImageToView(image.url, imageView.drawable, transformation, lowQualityCallback)
     }
+
+    private fun loadImageToView(
+        url: String,
+        placeHolder: Drawable?,
+        transformation: BitmapTransformation?,
+        callback: RequestListener<Drawable>
+    ) = with(Glide.with(this).load(url)) {
+        placeholder(placeHolder)
+        transformation?.let {
+            apply(GlideOptions.bitmapTransform(transformation))
+        }
+        listener(callback)
+        into(imageView)
+    }
+
+    private fun runInGlideCallback(callback: (resource: Drawable?) -> Unit): RequestListener<Drawable> =
+        object : RequestListener<Drawable> {
+            override fun onLoadFailed(
+                e: GlideException?,
+                model: Any?,
+                target: Target<Drawable>?,
+                isFirstResource: Boolean
+            ): Boolean {
+                return false
+            }
+
+            override fun onResourceReady(
+                resource: Drawable?,
+                model: Any?,
+                target: Target<Drawable>?,
+                dataSource: DataSource?,
+                isFirstResource: Boolean
+            ): Boolean {
+                callback.invoke(resource)
+                return false
+            }
+        }
 }

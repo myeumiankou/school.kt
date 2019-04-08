@@ -45,9 +45,7 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
     lateinit var presenter: ListImagePresenter
 
     @ProvidePresenter
-    fun providePresenter(): ListImagePresenter {
-        return ListImagePresenter(repository, uiHandler)
-    }
+    fun providePresenter(): ListImagePresenter = ListImagePresenter(repository, uiHandler)
 
     companion object {
         const val IMAGE_ROW_COUNT = 4

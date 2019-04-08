@@ -30,10 +30,8 @@ object ServiceProperties {
     const val BASE_URL = "http://www.splashbase.co/api/v1/images/"
 }
 
-inline fun <reified T> createWebService(url: String): T {
-    return Retrofit.Builder()
+inline fun <reified T> createWebService(url: String): T = Retrofit.Builder()
         .baseUrl(url)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
         .create(T::class.java)
-}
