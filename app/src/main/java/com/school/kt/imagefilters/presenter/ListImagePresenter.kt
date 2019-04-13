@@ -35,12 +35,10 @@ class ListImagePresenter(
     private suspend fun searchImagesInternal(query: String? = null) {
         // UI
         viewState.showProgress()
-        val task = GlobalScope.async(Dispatchers.IO) {
-            if (query != null) {
-                repository.searchImages(query)
-            } else {
-                repository.latestImages()
-            }
+        val task = if (query != null) {
+            GlobalScope.async(Dispatchers.IO) { repository.searchImages(query) }
+        } else {
+            GlobalScope.async(Dispatchers.IO) { repository.latestImages() }
         }
         // BG
         val results = task.await()
