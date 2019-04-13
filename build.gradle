@@ -10,6 +10,7 @@ buildscript {
     ext.android_gpuimage = '2.0.3'
     ext.glide_transformations = '4.0.0'
     ext.anko_version = '0.10.8'
+    ext.coroutines_version = '1.2.0'
 
     repositories {
         google()

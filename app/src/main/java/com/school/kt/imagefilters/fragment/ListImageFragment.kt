@@ -35,7 +35,6 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
 
     private val notificationManager: NotificationManager by inject()
     private val repository: ListImageRepository by inject()
-    private val uiHandler: Handler by inject()
     private val router: ImagePreviewRouter by inject { parametersOf(fragmentManager) }
 
     private lateinit var recyclerView: RecyclerView
@@ -45,7 +44,7 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
     lateinit var presenter: ListImagePresenter
 
     @ProvidePresenter
-    fun providePresenter(): ListImagePresenter = ListImagePresenter(repository, uiHandler)
+    fun providePresenter(): ListImagePresenter = ListImagePresenter(repository)
 
     companion object {
         const val IMAGE_ROW_COUNT = 4
