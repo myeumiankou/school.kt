@@ -46,7 +46,7 @@ class EditImageFragment : MvpAppCompatFragment(), FilterImageAdapter.ImageClickL
     lateinit var presenter: EditImagePresenter
 
     @ProvidePresenter
-    fun providePresenter(): EditImagePresenter = EditImagePresenter(getImage()!!)
+    fun providePresenter(): EditImagePresenter = EditImagePresenter(Glide.with(this), getImage()!!, Handler())
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.edit_image_fragment_layout, container, false)
@@ -93,55 +93,5 @@ class EditImageFragment : MvpAppCompatFragment(), FilterImageAdapter.ImageClickL
         textView.text = message
     }
 
-    override fun loadImage(image: Image, transformation: BitmapTransformation?) {
-        val highQualityCallback = runInGlideCallback {
-            showMessage("High quality image loaded")
-        }
-
-        val lowQualityCallback = runInGlideCallback {
-            showMessage("Low quality image loaded (Loading high quality...)")
-            Handler().postDelayed({
-                loadImageToView(image.largeUrl, it, transformation, highQualityCallback)
-            }, 100)
-        }
-
-        loadImageToView(image.url, imageView.drawable, transformation, lowQualityCallback)
-    }
-
-    private fun loadImageToView(
-        url: String,
-        placeHolder: Drawable?,
-        transformation: BitmapTransformation?,
-        callback: RequestListener<Drawable>
-    ) = with(Glide.with(this).load(url)) {
-        placeholder(placeHolder)
-        transformation?.let {
-            apply(GlideOptions.bitmapTransform(transformation))
-        }
-        listener(callback)
-        into(imageView)
-    }
-
-    private fun runInGlideCallback(callback: (resource: Drawable?) -> Unit): RequestListener<Drawable> =
-        object : RequestListener<Drawable> {
-            override fun onLoadFailed(
-                e: GlideException?,
-                model: Any?,
-                target: Target<Drawable>?,
-                isFirstResource: Boolean
-            ): Boolean {
-                return false
-            }
-
-            override fun onResourceReady(
-                resource: Drawable?,
-                model: Any?,
-                target: Target<Drawable>?,
-                dataSource: DataSource?,
-                isFirstResource: Boolean
-            ): Boolean {
-                callback.invoke(resource)
-                return false
-            }
-        }
+    override fun setImage(resource: Drawable?) = imageView.setImageDrawable(resource)
 }
