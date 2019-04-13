@@ -1,7 +1,6 @@
 package com.school.kt.imagefilters.fragment
 
 import android.os.Bundle
-import android.os.Handler
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.GridLayoutManager
 import android.support.v7.widget.RecyclerView
@@ -50,7 +49,7 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
         const val IMAGE_ROW_COUNT = 4
     }
 
-    private lateinit var searchView: SearchView
+    private var searchView: SearchView? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         UI {
@@ -77,10 +76,8 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
 
     override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
         inflater!!.inflate(R.menu.search, menu)
-        if (!::searchView.isInitialized) {
-            searchView = menu?.findItem(R.id.search)!!.actionView as SearchView
-        }
-        searchView.setOnQueryTextListener(this)
+        searchView = menu?.findItem(R.id.search)!!.actionView as SearchView
+        searchView?.setOnQueryTextListener(this)
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {

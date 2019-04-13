@@ -6,9 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.support.v7.widget.DividerItemDecoration
 import android.support.v7.widget.LinearLayoutManager
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.Toast
 import com.arellomobile.mvp.MvpAppCompatFragment
 import com.bumptech.glide.Glide
@@ -45,6 +43,7 @@ class EditImageFragment : MvpAppCompatFragment(), FilterImageAdapter.ImageClickL
         inflater.inflate(R.layout.edit_image_fragment_layout, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        setHasOptionsMenu(true)
         arguments?.getParcelable<Image>(IMAGE_URL_EXTRA)?.apply {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 imageView.transitionName = this.url
@@ -57,6 +56,22 @@ class EditImageFragment : MvpAppCompatFragment(), FilterImageAdapter.ImageClickL
                 addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.HORIZONTAL))
             }
         }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?, inflater: MenuInflater?) {
+        inflater!!.inflate(R.menu.save_and_share_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.save -> {
+                return true
+            }
+            R.id.share -> {
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onImageClicked(image: Image, transformation: BitmapTransformation) {
@@ -72,7 +87,7 @@ class EditImageFragment : MvpAppCompatFragment(), FilterImageAdapter.ImageClickL
         val lowQualityCallback = runInGlideCallback {
             textView.text = "Low quality image loaded (Loading high quality...)"
             Handler().postDelayed({
-                loadImageToView(image.url, it, transformation, highQualityCallback)
+                loadImageToView(image.largeUrl, it, transformation, highQualityCallback)
             }, 100)
         }
 

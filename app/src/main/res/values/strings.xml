@@ -5,4 +5,7 @@
     <string name="search_message">Search images first</string>
 
     <string name="show_notification">Show notification</string>
+
+    <string name="save">Save</string>
+    <string name="share">Share</string>
 </resources>
