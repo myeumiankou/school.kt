@@ -11,6 +11,9 @@ class MainActivity : MvpAppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         frameLayout { id = R.id.container }
-        supportFragmentManager.beginTransaction().add(R.id.container, ListImageFragment()).commit()
+
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction().add(R.id.container, ListImageFragment()).commit()
+        }
     }
 }
