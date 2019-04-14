@@ -30,6 +30,10 @@ object ServiceProperties {
     const val BASE_URL = "http://www.splashbase.co/api/v1/images/"
 }
 
+object FileFolder {
+    const val SAVED_IMAGE_FOLDER_NAME = "ImageFilters1"
+}
+
 inline fun <reified T> createWebService(url: String): T = Retrofit.Builder()
         .baseUrl(url)
         .addConverterFactory(GsonConverterFactory.create())

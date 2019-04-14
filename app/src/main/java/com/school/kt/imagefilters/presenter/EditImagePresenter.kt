@@ -1,7 +1,9 @@
 package com.school.kt.imagefilters.presenter
 
+import android.Manifest
 import android.graphics.drawable.Drawable
 import android.os.Handler
+import android.support.annotation.RequiresPermission
 import com.arellomobile.mvp.InjectViewState
 import com.arellomobile.mvp.MvpPresenter
 import com.bumptech.glide.RequestManager
@@ -10,14 +12,24 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.school.kt.imagefilters.data.Image
+import com.school.kt.imagefilters.di.FileFolder
+import com.school.kt.imagefilters.di.GlideOptions.bitmapTransform
+import com.school.kt.imagefilters.ui.FileTarget
 import com.school.kt.imagefilters.view.EditImageView
 import jp.wasabeef.glide.transformations.BitmapTransformation
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+
 
 @InjectViewState
 class EditImagePresenter(
     private val glide: RequestManager,
     private val image: Image,
-    private val handler: Handler
+    private val handler: Handler,
+    private val externalFileDir: File
 ) :
     MvpPresenter<EditImageView>() {
 
@@ -27,12 +39,34 @@ class EditImagePresenter(
         loadImage(image)
     }
 
-    fun saveImage() {
-        TODO()
+    @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    fun saveImage() = CoroutineScope(Dispatchers.Main).launch {
+        viewState.showMessage("saving image")
+        val result = withContext(Dispatchers.IO) {
+            val directory = File(externalFileDir, File.separator + FileFolder.SAVED_IMAGE_FOLDER_NAME + File.separator)
+            directory.mkdirs()
+            val outFile = createTempFile("IMG", ".jpg", directory)
+            obtainImageFile(outFile.absolutePath, currentTransformation)
+            viewState.notifyGalleryAboutNewImage(outFile)
+
+            outFile
+        }
+        viewState.showToastMessage("saved to $result")
     }
 
-    fun shareImage() {
-        TODO()
+    fun shareImage() = CoroutineScope(Dispatchers.IO).launch {
+        val outFile = createTempFile(suffix = ".jpg")
+        obtainImageFile(outFile.path, currentTransformation)
+        viewState.shareImage(outFile)
+    }
+
+    private fun obtainImageFile(fileName: String, currentTransformation: BitmapTransformation?) {
+        with(glide.asBitmap().load(image.url)) {
+            currentTransformation?.let {
+                apply(bitmapTransform(currentTransformation))
+            }
+            into(FileTarget(fileName))
+        }
     }
 
     fun applyTransformation(transformation: BitmapTransformation) {
@@ -58,22 +92,20 @@ class EditImagePresenter(
                 showMessage("Low quality image loaded (Loading high quality...)")
             }
             handler.postDelayed({
-                loadImageToView(image.largeUrl, it, transformation, highQualityCallback)
+                loadBitmap(image.largeUrl, transformation, highQualityCallback)
             }, 100)
         }
 
-        loadImageToView(image.url, null, transformation, lowQualityCallback)
+        loadBitmap(image.url, transformation, lowQualityCallback)
     }
 
-    private fun loadImageToView(
+    private fun loadBitmap(
         url: String,
-        placeHolder: Drawable?,
         transformation: BitmapTransformation?,
         callback: RequestListener<Drawable>
     ) = with(glide.load(url)) {
-        placeholder(placeHolder)
         transformation?.let {
-            apply(com.school.kt.imagefilters.di.GlideOptions.bitmapTransform(transformation))
+            apply(bitmapTransform(transformation))
         }
         listener(callback)
         preload()
