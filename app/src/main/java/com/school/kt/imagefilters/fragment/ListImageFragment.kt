@@ -29,8 +29,7 @@ import org.jetbrains.anko.textView
 import org.koin.android.ext.android.inject
 import org.koin.core.parameter.parametersOf
 
-class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQueryTextListener,
-    ImageAdapter.ImageClickListener {
+class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQueryTextListener {
 
     private val notificationManager: NotificationManager by inject()
     private val repository: ListImageRepository by inject()
@@ -56,7 +55,8 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
             frameLayout {
                 recyclerView = recyclerView {
                     lparams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-                    adapter = ImageAdapter(this@ListImageFragment)
+                    adapter =
+                        ImageAdapter { view, image -> router.showImagePreview(this@ListImageFragment, view, image) }
                     layoutManager = GridLayoutManager(context, IMAGE_ROW_COUNT)
                     addItemDecoration(GridItemDecoration(5, IMAGE_ROW_COUNT))
                 }
@@ -85,10 +85,6 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
             R.id.notification -> notificationManager.showTestNotification()
         }
         return false
-    }
-
-    override fun onImageClicked(view: View, image: Image) {
-        router.showImagePreview(this, view, image)
     }
 
     override fun onQueryTextChange(query: String) = true
@@ -124,9 +120,7 @@ class ListImageFragment : MvpAppCompatFragment(), ListImageView, SearchView.OnQu
         messageView.text = "No results. Try another search!"
     }
 
-    override fun showResultCount(count: Int) {
-        Toast.makeText(context, "Results: $count", Toast.LENGTH_SHORT).show()
-    }
+    override fun showResultCount(count: Int) = Toast.makeText(context, "Results: $count", Toast.LENGTH_SHORT).show()
 
     override fun showFail(error: Int) {
         messageView.text = "Fail. Code = $error"

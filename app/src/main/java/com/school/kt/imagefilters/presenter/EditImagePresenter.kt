@@ -4,8 +4,8 @@ import android.Manifest
 import android.graphics.drawable.Drawable
 import android.os.Handler
 import android.support.annotation.RequiresPermission
+import android.util.Log
 import com.arellomobile.mvp.InjectViewState
-import com.arellomobile.mvp.MvpPresenter
 import com.bumptech.glide.RequestManager
 import com.bumptech.glide.load.DataSource
 import com.bumptech.glide.load.engine.GlideException
@@ -17,7 +17,6 @@ import com.school.kt.imagefilters.di.GlideOptions.bitmapTransform
 import com.school.kt.imagefilters.ui.FileTarget
 import com.school.kt.imagefilters.view.EditImageView
 import jp.wasabeef.glide.transformations.BitmapTransformation
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,9 +28,10 @@ class EditImagePresenter(
     private val glide: RequestManager,
     private val image: Image,
     private val handler: Handler,
-    private val externalFileDir: File
+    private val externalFileDir: File,
+    private val screenWidth: Int
 ) :
-    MvpPresenter<EditImageView>() {
+    BaseCoroutinePresenter<EditImageView>() {
 
     private var currentTransformation: BitmapTransformation? = null
 
@@ -40,9 +40,11 @@ class EditImagePresenter(
     }
 
     @RequiresPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    fun saveImage() = CoroutineScope(Dispatchers.Main).launch {
+    fun saveImage() = uiScope.launch {
+        Log.e("EditImagePresenter", "notifying UI in " + Thread.currentThread())
         viewState.showMessage("saving image")
         val result = withContext(Dispatchers.IO) {
+            Log.e("EditImagePresenter", "saving image in thread " + Thread.currentThread())
             val directory = File(externalFileDir, File.separator + FileFolder.SAVED_IMAGE_FOLDER_NAME + File.separator)
             directory.mkdirs()
             val outFile = createTempFile("IMG", ".jpg", directory)
@@ -51,13 +53,16 @@ class EditImagePresenter(
 
             outFile
         }
+
+        Log.e("EditImagePresenter", "notifying UI in " + Thread.currentThread())
         viewState.showToastMessage("saved to $result")
     }
 
-    fun shareImage() = CoroutineScope(Dispatchers.IO).launch {
-        val outFile = createTempFile(suffix = ".jpg")
-        obtainImageFile(outFile.path, currentTransformation)
-        viewState.shareImage(outFile)
+    fun shareImage() = ioScope.launch {
+        with(createTempFile(suffix = ".jpg")) {
+            obtainImageFile(path, currentTransformation)
+            viewState.shareImage(this)
+        }
     }
 
     private fun obtainImageFile(fileName: String, currentTransformation: BitmapTransformation?) {
@@ -108,7 +113,7 @@ class EditImagePresenter(
             apply(bitmapTransform(transformation))
         }
         listener(callback)
-        preload()
+        preload(screenWidth, screenWidth)
     }
 
     private fun runInGlideCallback(callback: (resource: Drawable?) -> Unit): RequestListener<Drawable> =

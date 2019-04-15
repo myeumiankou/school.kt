@@ -11,7 +11,7 @@ import jp.wasabeef.glide.transformations.gpu.*
 
 class FilterImageAdapter(
     private val image: Image,
-    private val clickListener: ImageClickListener
+    private val clickListener: (image: Image, transformation: BitmapTransformation) -> Unit
 ) : RecyclerView.Adapter<FilterImageViewHolder>() {
 
     private val filters = listOf(
@@ -28,12 +28,7 @@ class FilterImageAdapter(
         ContrastFilterTransformation()
     )
 
-    interface ImageClickListener {
-        fun onImageClicked(image: Image, transformation: BitmapTransformation)
-    }
-
-    override fun onBindViewHolder(holder: FilterImageViewHolder, position: Int) =
-        holder.bind(image, filters[position], clickListener)
+    override fun onBindViewHolder(holder: FilterImageViewHolder, position: Int) = holder.bind(image, filters[position], clickListener)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FilterImageViewHolder =
         with(ImageView(parent.context)) {

@@ -28,25 +28,18 @@ import com.school.kt.imagefilters.ui.FilterImageAdapter
 import com.school.kt.imagefilters.view.EditImageView
 import jp.wasabeef.glide.transformations.BitmapTransformation
 import kotlinx.android.synthetic.main.edit_image_fragment_layout.*
+import org.jetbrains.anko.support.v4.withArguments
 import java.io.File
 
 
-class EditImageFragment : MvpAppCompatFragment(), FilterImageAdapter.ImageClickListener, EditImageView {
+class EditImageFragment : MvpAppCompatFragment(), EditImageView {
 
     companion object {
         private const val IMAGE_URL_EXTRA = "image_url"
 
         private const val PERMISSION_REQUEST_CODE = 1
 
-        fun newInstance(image: Image): EditImageFragment {
-            with(Bundle()) {
-                putParcelable(IMAGE_URL_EXTRA, image)
-
-                val fragment = EditImageFragment()
-                fragment.arguments = this
-                return fragment
-            }
-        }
+        fun newInstance(image: Image) = EditImageFragment().withArguments(IMAGE_URL_EXTRA to image)
     }
 
     @InjectPresenter
@@ -57,7 +50,8 @@ class EditImageFragment : MvpAppCompatFragment(), FilterImageAdapter.ImageClickL
         Glide.with(this),
         getImage()!!,
         Handler(),
-        Environment.getExternalStorageDirectory()
+        Environment.getExternalStorageDirectory(),
+        resources.displayMetrics.widthPixels
     )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
@@ -71,7 +65,8 @@ class EditImageFragment : MvpAppCompatFragment(), FilterImageAdapter.ImageClickL
             }
 
             with(recyclerView) {
-                adapter = FilterImageAdapter(this@apply, this@EditImageFragment)
+                adapter =
+                    FilterImageAdapter(this@apply) { _, transformation -> presenter.applyTransformation(transformation) }
                 layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
                 addItemDecoration(DividerItemDecoration(context, LinearLayoutManager.HORIZONTAL))
             }
@@ -108,17 +103,11 @@ class EditImageFragment : MvpAppCompatFragment(), FilterImageAdapter.ImageClickL
         return super.onOptionsItemSelected(item)
     }
 
-    override fun onImageClicked(image: Image, transformation: BitmapTransformation) {
-        presenter.applyTransformation(transformation)
-    }
-
     override fun showMessage(message: String) {
         textView.text = message
     }
 
-    override fun showToastMessage(message: String) {
-        Toast.makeText(activity, message, Toast.LENGTH_LONG).show()
-    }
+    override fun showToastMessage(message: String) = Toast.makeText(activity, message, Toast.LENGTH_LONG).show()
 
     override fun shareImage(file: File) = with(Intent(Intent.ACTION_SEND)) {
         type = "image/jpeg"
@@ -144,9 +133,8 @@ class EditImageFragment : MvpAppCompatFragment(), FilterImageAdapter.ImageClickL
         }
     }
 
-    override fun notifyGalleryAboutNewImage(file: File) {
-        MediaScannerConnection.scanFile(context, arrayOf(file.toString()), arrayOf("image/jpg"),null)
-    }
+    override fun notifyGalleryAboutNewImage(file: File) =
+        MediaScannerConnection.scanFile(context, arrayOf(file.toString()), arrayOf("image/jpg"), null)
 
     override fun setImage(resource: Drawable?) = imageView.setImageDrawable(resource)
 }

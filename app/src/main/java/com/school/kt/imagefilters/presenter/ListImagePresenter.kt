@@ -10,20 +10,12 @@ import kotlinx.coroutines.*
 @InjectViewState
 class ListImagePresenter(
     private val repository: ListImageRepository
-) : MvpPresenter<ListImageView>() {
-
-    private var job = Job()
-
-    private val uiScope = CoroutineScope(Dispatchers.Main + job)
+) : BaseCoroutinePresenter<ListImageView>() {
 
     override fun onFirstViewAttach() {
         uiScope.launch {
             searchImagesInternal()
         }
-    }
-
-    override fun onDestroy() {
-        job.cancel()
     }
 
     fun searchImages(query: String?) {

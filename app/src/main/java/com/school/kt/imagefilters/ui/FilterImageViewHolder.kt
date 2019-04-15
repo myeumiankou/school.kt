@@ -12,11 +12,11 @@ class FilterImageViewHolder(view: ImageView) : RecyclerView.ViewHolder(view) {
     fun bind(
         image: Image,
         transformation: BitmapTransformation,
-        clickListener: FilterImageAdapter.ImageClickListener
+        clickListener: (image: Image, transformation: BitmapTransformation) -> Unit
     ) {
         with(itemView as ImageView) {
             Glide.with(this).load(image.url).apply(GlideOptions.bitmapTransform(transformation)).into(this)
-            setOnClickListener { clickListener.onImageClicked(image, transformation) }
+            setOnClickListener { clickListener(image, transformation) }
         }
     }
 }
